@@ -43,22 +43,98 @@ font-size:16px;
 
 <script>
 
-var map = L.map('map').setView([0,0],2);
+var map = L.map('map').setView([0,0],3);
 
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{ maxZoom:19 }
+{maxZoom:19}
 ).addTo(map);
+
 
 function scanArea(){
 
 let center = map.getCenter();
 
-L.marker(center)
-.addTo(map)
-.bindPopup("⚠ Possible anomaly")
-.openPopup();
+for(let i=0;i<10;i++){
 
+let lat = center.lat + (Math.random()-0.5)*4;
+let lng = center.lng + (Math.random()-0.5)*4;
+
+scanTile(lat,lng);
+
+}
+
+}
+
+
+function scanTile(lat,lng){
+
+let zoom = map.getZoom();
+
+let tileX = long2tile(lng, zoom);
+let tileY = lat2tile(lat, zoom);
+
+let url = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
+
+let img = new Image();
+
+img.crossOrigin="anonymous";
+
+img.src = url;
+
+img.onload=function(){
+
+let canvas=document.createElement("canvas");
+
+canvas.width=256;
+canvas.height=256;
+
+let ctx=canvas.getContext("2d");
+
+ctx.drawImage(img,0,0);
+
+let data=ctx.getImageData(0,0,256,256).data;
+
+let contrast=0;
+
+for(let i=0;i<data.length;i+=4){
+
+let r=data[i];
+let g=data[i+1];
+let b=data[i+2];
+
+let brightness=(r+g+b)/3;
+
+if(brightness>220 || brightness<30){
+
+contrast++;
+
+}
+
+}
+
+if(contrast>6000){
+
+L.marker([lat,lng])
+.addTo(map)
+.bindPopup("⚠ anomaly detected");
+
+}
+
+};
+
+}
+
+
+function long2tile(lon,zoom){
+return Math.floor((lon+180)/360*Math.pow(2,zoom));
+}
+
+function lat2tile(lat,zoom){
+return Math.floor(
+(1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2
+*Math.pow(2,zoom)
+);
 }
 
 </script>
