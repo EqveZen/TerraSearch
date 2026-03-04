@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="utf-8">
-<title>Test Map</title>
+<title>Earth Anomaly Finder</title>
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -12,12 +12,19 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 
 body{
-margin:0;
+font-family:Arial;
+text-align:center;
 }
 
 #map{
-height:100vh;
+height:500px;
 width:100%;
+}
+
+button{
+margin-top:20px;
+padding:10px 20px;
+font-size:16px;
 }
 
 </style>
@@ -26,20 +33,33 @@ width:100%;
 
 <body>
 
+<h2>🌍 Earth Anomaly Finder</h2>
+
 <div id="map"></div>
+
+<button onclick="scanArea()">Scan Area</button>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-var map = L.map('map').setView([51.505, -0.09], 13);
+var map = L.map('map').setView([0,0],2);
 
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-maxZoom:19
-}
+{ maxZoom:19 }
 ).addTo(map);
+
+function scanArea(){
+
+let center = map.getCenter();
+
+L.marker(center)
+.addTo(map)
+.bindPopup("⚠ Possible anomaly")
+.openPopup();
+
+}
 
 </script>
 
